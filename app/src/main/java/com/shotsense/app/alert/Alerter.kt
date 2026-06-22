@@ -32,6 +32,11 @@ data class AlertPayload(
     val approximateLocation: Boolean = false,
     /** true for the "Send test alert" button so payloads are clearly labelled. */
     val isTest: Boolean = false,
+    // Operator profile
+    val operatorName: String = "",
+    val operatorPhone: String = "",
+    val firearmType: String = "",
+    val photoUrl: String = "",
 )
 
 /** Per-channel send configuration. */
@@ -161,6 +166,10 @@ class Alerter(private val context: Context) {
         put("recoilG", p.recoilG.toDouble())
         put("test", p.isTest)
         put("approximateLocation", p.approximateLocation)
+        put("operatorName", p.operatorName)
+        put("operatorPhone", p.operatorPhone)
+        put("firearmType", p.firearmType)
+        put("photoUrl", p.photoUrl)
     }.toString()
 
     private fun fmt(v: Double): String = String.format("%.6f", v)

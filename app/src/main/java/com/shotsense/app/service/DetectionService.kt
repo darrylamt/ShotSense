@@ -217,6 +217,10 @@ class DetectionService : LifecycleService() {
                     soundPeak = shot.soundPeak,
                     recoilG = shot.recoilG,
                     approximateLocation = fix?.approximate ?: false,
+                    operatorName = settings.operatorName,
+                    operatorPhone = settings.operatorPhone,
+                    firearmType = settings.firearmType,
+                    photoUrl = settings.photoUrl,
                 )
                 val results = alerter.send(payload, settings.toAlertConfig())
                 results.joinToString("; ") { "${it.channel} ${if (it.success) "ok" else "FAIL(${it.detail})"}" }
@@ -267,12 +271,16 @@ class DetectionService : LifecycleService() {
                 lat = fix?.lat,
                 lng = fix?.lng,
                 accuracyMeters = fix?.accuracyMeters,
-                shots = 0,
-                confirmed = false,
-                soundPeak = 0f,
-                recoilG = 0f,
+                shots = 1,
+                confirmed = true,
+                soundPeak = 0.94f,
+                recoilG = 3.1f,
                 approximateLocation = fix?.approximate ?: false,
                 isTest = true,
+                operatorName = settings.operatorName,
+                operatorPhone = settings.operatorPhone,
+                firearmType = settings.firearmType,
+                photoUrl = settings.photoUrl,
             )
             val results = alerter.send(payload, settings.toAlertConfig())
             val status = "TEST ALERT → " + results.joinToString("; ") {

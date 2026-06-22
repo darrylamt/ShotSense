@@ -30,7 +30,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.KeyboardActions
 import com.shotsense.app.data.ArmingMode
 import com.shotsense.app.data.Settings
 import com.shotsense.app.ui.components.Panel
@@ -135,9 +139,41 @@ fun SettingsScreen(
             )
         }
 
+        // --- Operator profile ---
+        Panel(title = "OPERATOR PROFILE", accent = Palette.Green) {
+            Text(
+                "Sent with every alert so the console can identify who raised it.",
+                color = Palette.TextDim,
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            Spacer(Modifier.height(8.dp))
+            TextRow("Full name", settings.operatorName, KeyboardType.Text) {
+                onUpdate(settings.copy(operatorName = it))
+            }
+            Spacer(Modifier.height(6.dp))
+            TextRow("Phone number", settings.operatorPhone, KeyboardType.Phone) {
+                onUpdate(settings.copy(operatorPhone = it))
+            }
+            Spacer(Modifier.height(6.dp))
+            TextRow("Firearm type", settings.firearmType, KeyboardType.Text) {
+                onUpdate(settings.copy(firearmType = it))
+            }
+            Spacer(Modifier.height(6.dp))
+            TextRow("Photo URL (optional)", settings.photoUrl, KeyboardType.Uri) {
+                onUpdate(settings.copy(photoUrl = it))
+            }
+            Text(
+                "Photo URL: a link to a profile image shown in the response console.",
+                color = Palette.TextDim,
+                style = MaterialTheme.typography.labelSmall,
+            )
+        }
+
         // --- Identity ---
         Panel(title = "DEVICE", accent = Palette.Teal) {
-            TextRow("Device ID", settings.deviceId) { onUpdate(settings.copy(deviceId = it)) }
+            TextRow("Device ID", settings.deviceId, KeyboardType.Text) {
+                onUpdate(settings.copy(deviceId = it))
+            }
         }
 
         // --- SMS channel ---
@@ -146,7 +182,9 @@ fun SettingsScreen(
                 onUpdate(settings.copy(smsEnabled = it))
             }
             Spacer(Modifier.height(6.dp))
-            TextRow("Emergency number", settings.smsNumber) { onUpdate(settings.copy(smsNumber = it)) }
+            TextRow("Emergency number", settings.smsNumber, KeyboardType.Phone) {
+                onUpdate(settings.copy(smsNumber = it))
+            }
             Text(
                 "Requires SEND_SMS permission. Offline fallback channel.",
                 color = Palette.TextDim,
@@ -160,7 +198,9 @@ fun SettingsScreen(
                 onUpdate(settings.copy(httpEnabled = it))
             }
             Spacer(Modifier.height(6.dp))
-            TextRow("Endpoint URL", settings.httpUrl) { onUpdate(settings.copy(httpUrl = it)) }
+            TextRow("Endpoint URL", settings.httpUrl, KeyboardType.Uri) {
+                onUpdate(settings.copy(httpUrl = it))
+            }
             Text(
                 "Primary scalable channel; feeds the response console.",
                 color = Palette.TextDim,
@@ -219,13 +259,23 @@ private fun ToggleRow(label: String, checked: Boolean, accent: Color, onChange: 
 }
 
 @Composable
-private fun TextRow(label: String, value: String, onChange: (String) -> Unit) {
+private fun TextRow(
+    label: String,
+    value: String,
+    keyboardType: KeyboardType = KeyboardType.Text,
+    onChange: (String) -> Unit,
+) {
     OutlinedTextField(
         value = value,
         onValueChange = onChange,
         label = { Text(label) },
         singleLine = true,
         modifier = Modifier.fillMaxWidth(),
+        keyboardOptions = KeyboardOptions(
+            keyboardType = keyboardType,
+            imeAction = ImeAction.Done,
+            autoCorrect = false,
+        ),
     )
 }
 

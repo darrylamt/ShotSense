@@ -100,7 +100,18 @@
     0%, 100% { background: var(--surface-alt); }
     50% { background: #2a1414; }
   }
-  .card .row1 { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .avatar {
+    width: 44px; height: 44px; border-radius: 50%;
+    object-fit: cover; border: 2px solid var(--line); flex-shrink: 0;
+    background: var(--surface-alt); display: flex; align-items: center;
+    justify-content: center; font-size: 18px; font-weight: 700; color: var(--dim);
+    overflow: hidden;
+  }
+  .avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .operator-block { flex: 1; min-width: 0; }
+  .operator-name { font-weight: 700; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .operator-meta { font-size: 12px; color: var(--dim); }
+  .card .row1 { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
   .badge {
     font-size: 11px; font-weight: 700; letter-spacing: 1px;
     padding: 3px 8px; border-radius: 4px;
@@ -220,6 +231,15 @@
     try { return new Date(iso).toLocaleString(); } catch (e) { return iso; }
   }
 
+  function avatarHtml(a) {
+    var initial = (a.operatorName || a.deviceId || '?').charAt(0).toUpperCase();
+    if (a.photoUrl) {
+      return '<div class="avatar"><img src="' + escapeHtml(a.photoUrl) +
+        '" alt="" onerror="this.parentNode.innerHTML=\'' + escapeHtml(initial) + '\'"></div>';
+    }
+    return '<div class="avatar">' + escapeHtml(initial) + '</div>';
+  }
+
   function cardHtml(a) {
     var kind = a.test ? 'test' : 'gunshot';
     var conf = a.confirmed
@@ -231,12 +251,23 @@
       ? fmtCoord(a.lat) + ', ' + fmtCoord(a.lng) + (a.approximateLocation ? ' (approx)' : '')
       : 'unavailable';
     var unack = !a.test && !a.acknowledged ? ' unack' : '';
+    var operatorName = a.operatorName || a.deviceId;
+    var metaParts = [];
+    if (a.operatorPhone) metaParts.push(escapeHtml(a.operatorPhone));
+    if (a.firearmType) metaParts.push(escapeHtml(a.firearmType));
+    if (!a.operatorName) metaParts.push('Device: ' + escapeHtml(a.deviceId));
     return (
       '<div class="card ' + kind + unack + '" id="card-' + a.id + '">' +
         '<div class="row1">' +
-          '<span class="badge ' + kind + '">' + (a.test ? 'TEST' : 'GUNSHOT') + '</span>' +
-          '<span class="device">' + escapeHtml(a.deviceId) + '</span>' +
-          '<span class="when" style="margin-left:auto">' + fmtTime(a.receivedAt) + '</span>' +
+          avatarHtml(a) +
+          '<div class="operator-block">' +
+            '<div class="operator-name">' + escapeHtml(operatorName) + '</div>' +
+            (metaParts.length ? '<div class="operator-meta">' + metaParts.join(' · ') + '</div>' : '') +
+          '</div>' +
+          '<div style="text-align:right;flex-shrink:0">' +
+            '<span class="badge ' + kind + '">' + (a.test ? 'TEST' : 'GUNSHOT') + '</span><br>' +
+            '<span class="when">' + fmtTime(a.receivedAt) + '</span>' +
+          '</div>' +
         '</div>' +
         '<div class="grid">' +
           '<span class="k">Shots</span><span class="v">' + a.shots + '</span>' +

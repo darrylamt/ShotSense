@@ -29,6 +29,11 @@ data class Settings(
     val httpEnabled: Boolean = false,
     val httpUrl: String = "",
     val armingMode: ArmingMode = ArmingMode.TEST,
+    // Operator / user profile sent with every alert
+    val operatorName: String = "",
+    val operatorPhone: String = "",
+    val firearmType: String = "",
+    val photoUrl: String = "",
 )
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "shotsense_settings")
@@ -50,6 +55,10 @@ class SettingsStore(private val context: Context) {
     suspend fun setHttpEnabled(v: Boolean) = put { it[K.httpEnabled] = v }
     suspend fun setHttpUrl(v: String) = put { it[K.httpUrl] = v }
     suspend fun setArmingMode(v: ArmingMode) = put { it[K.armingMode] = v.name }
+    suspend fun setOperatorName(v: String) = put { it[K.operatorName] = v }
+    suspend fun setOperatorPhone(v: String) = put { it[K.operatorPhone] = v }
+    suspend fun setFirearmType(v: String) = put { it[K.firearmType] = v }
+    suspend fun setPhotoUrl(v: String) = put { it[K.photoUrl] = v }
 
     /** Persist a whole snapshot in one edit (used by the settings screen). */
     suspend fun saveAll(s: Settings) = put { p ->
@@ -65,6 +74,10 @@ class SettingsStore(private val context: Context) {
         p[K.httpEnabled] = s.httpEnabled
         p[K.httpUrl] = s.httpUrl
         p[K.armingMode] = s.armingMode.name
+        p[K.operatorName] = s.operatorName
+        p[K.operatorPhone] = s.operatorPhone
+        p[K.firearmType] = s.firearmType
+        p[K.photoUrl] = s.photoUrl
     }
 
     private suspend fun put(block: (androidx.datastore.preferences.core.MutablePreferences) -> Unit) {
@@ -87,6 +100,10 @@ class SettingsStore(private val context: Context) {
             httpUrl = this[K.httpUrl] ?: defaults.httpUrl,
             armingMode = runCatching { ArmingMode.valueOf(this[K.armingMode] ?: defaults.armingMode.name) }
                 .getOrDefault(defaults.armingMode),
+            operatorName = this[K.operatorName] ?: defaults.operatorName,
+            operatorPhone = this[K.operatorPhone] ?: defaults.operatorPhone,
+            firearmType = this[K.firearmType] ?: defaults.firearmType,
+            photoUrl = this[K.photoUrl] ?: defaults.photoUrl,
         )
     }
 
@@ -103,5 +120,9 @@ class SettingsStore(private val context: Context) {
         val httpEnabled = booleanPreferencesKey("http_enabled")
         val httpUrl = stringPreferencesKey("http_url")
         val armingMode = stringPreferencesKey("arming_mode")
+        val operatorName = stringPreferencesKey("operator_name")
+        val operatorPhone = stringPreferencesKey("operator_phone")
+        val firearmType = stringPreferencesKey("firearm_type")
+        val photoUrl = stringPreferencesKey("photo_url")
     }
 }

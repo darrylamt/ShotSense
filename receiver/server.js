@@ -131,6 +131,10 @@ function normalize(raw, req) {
     approximateLocation: !!r.approximateLocation,
     sourceIp: req.socket.remoteAddress || null,
     acknowledged: false,
+    operatorName: typeof r.operatorName === 'string' ? r.operatorName : '',
+    operatorPhone: typeof r.operatorPhone === 'string' ? r.operatorPhone : '',
+    firearmType: typeof r.firearmType === 'string' ? r.firearmType : '',
+    photoUrl: typeof r.photoUrl === 'string' ? r.photoUrl : '',
   };
 }
 
