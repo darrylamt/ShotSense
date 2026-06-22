@@ -4,71 +4,36 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>ShotSense — Response Console</title>
-<link
-  rel="stylesheet"
-  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-  integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-  crossorigin=""
-/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 <style>
   :root {
-    --bg: #0b0e12;
-    --surface: #141a21;
-    --surface-alt: #1b232c;
-    --line: #232c36;
-    --amber: #ffb300;
-    --teal: #1de9b6;
-    --red: #ff5252;
-    --green: #69f0ae;
-    --text: #e6e8eb;
-    --dim: #8a929b;
+    --bg: #0b0e12; --surface: #141a21; --surface-alt: #1b232c; --line: #232c36;
+    --amber: #ffb300; --teal: #1de9b6; --red: #ff5252; --green: #69f0ae;
+    --blue: #448aff; --text: #e6e8eb; --dim: #8a929b;
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; height: 100%; }
   body {
-    background: var(--bg);
-    color: var(--text);
+    background: var(--bg); color: var(--text);
     font-family: Roboto, "Segoe UI", system-ui, sans-serif;
     font-variant-numeric: tabular-nums;
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    overflow: hidden;
+    display: flex; flex-direction: column; height: 100vh; overflow: hidden;
   }
   header {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    padding: 12px 18px;
-    background: var(--surface);
-    border-bottom: 1px solid var(--line);
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 16px; background: var(--surface);
+    border-bottom: 1px solid var(--line); flex-wrap: wrap;
   }
-  header h1 {
-    font-size: 18px;
-    letter-spacing: 2px;
-    margin: 0;
-    color: var(--amber);
-    font-weight: 700;
-  }
+  header h1 { font-size: 16px; letter-spacing: 2px; margin: 0; color: var(--amber); font-weight: 700; white-space: nowrap; }
   .spacer { flex: 1; }
-  .pill {
-    font-size: 12px;
-    padding: 4px 10px;
-    border-radius: 999px;
-    border: 1px solid var(--line);
-    color: var(--dim);
-  }
+  .pill { font-size: 12px; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line); color: var(--dim); white-space: nowrap; }
   .pill.live { color: var(--green); border-color: var(--green); }
   .pill.down { color: var(--red); border-color: var(--red); }
+  .pill.station { color: var(--blue); border-color: var(--blue); font-weight: 700; }
   .counts b { color: var(--text); }
   button.ctl {
-    background: var(--surface-alt);
-    color: var(--text);
-    border: 1px solid var(--line);
-    border-radius: 6px;
-    padding: 6px 12px;
-    cursor: pointer;
-    font-size: 13px;
+    background: var(--surface-alt); color: var(--text); border: 1px solid var(--line);
+    border-radius: 6px; padding: 6px 11px; cursor: pointer; font-size: 12px; white-space: nowrap;
   }
   button.ctl:hover { border-color: var(--teal); }
   button.ctl.active { color: var(--bg); background: var(--teal); border-color: var(--teal); font-weight: 700; }
@@ -76,22 +41,20 @@
   main { flex: 1; display: flex; min-height: 0; }
   #map { flex: 1; min-width: 0; background: #0e1318; }
   aside {
-    width: 420px;
-    max-width: 45vw;
-    border-left: 1px solid var(--line);
-    background: var(--surface);
-    overflow-y: auto;
-    padding: 12px;
+    width: 420px; max-width: 45vw; border-left: 1px solid var(--line);
+    background: var(--surface); overflow-y: auto; padding: 12px;
   }
   .empty { color: var(--dim); text-align: center; padding: 40px 10px; font-size: 14px; }
+  .aside-header {
+    font-size: 11px; font-weight: 700; letter-spacing: 1px; color: var(--dim);
+    padding: 0 0 8px 0; margin-bottom: 4px; border-bottom: 1px solid var(--line);
+    text-transform: uppercase;
+  }
 
+  /* Alert cards */
   .card {
-    border: 1px solid var(--line);
-    border-left-width: 4px;
-    border-radius: 8px;
-    background: var(--surface-alt);
-    padding: 12px;
-    margin-bottom: 10px;
+    border: 1px solid var(--line); border-left-width: 4px; border-radius: 8px;
+    background: var(--surface-alt); padding: 12px; margin-bottom: 10px;
   }
   .card.gunshot { border-left-color: var(--red); }
   .card.test { border-left-color: var(--amber); opacity: 0.85; }
@@ -101,114 +64,218 @@
     50% { background: #2a1414; }
   }
   .avatar {
-    width: 44px; height: 44px; border-radius: 50%;
-    object-fit: cover; border: 2px solid var(--line); flex-shrink: 0;
-    background: var(--surface-alt); display: flex; align-items: center;
-    justify-content: center; font-size: 18px; font-weight: 700; color: var(--dim);
-    overflow: hidden;
+    width: 44px; height: 44px; border-radius: 50%; border: 2px solid var(--line);
+    flex-shrink: 0; background: var(--surface-alt); display: flex; align-items: center;
+    justify-content: center; font-size: 18px; font-weight: 700; color: var(--dim); overflow: hidden;
   }
   .avatar img { width: 100%; height: 100%; object-fit: cover; }
   .operator-block { flex: 1; min-width: 0; }
   .operator-name { font-weight: 700; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .operator-meta { font-size: 12px; color: var(--dim); }
   .card .row1 { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-  .badge {
-    font-size: 11px; font-weight: 700; letter-spacing: 1px;
-    padding: 3px 8px; border-radius: 4px;
-  }
+  .badge { font-size: 11px; font-weight: 700; letter-spacing: 1px; padding: 3px 8px; border-radius: 4px; }
   .badge.gunshot { background: var(--red); color: #1a0000; }
   .badge.test { background: var(--amber); color: #1a1200; }
-  .device { font-weight: 700; }
   .when { color: var(--dim); font-size: 12px; }
-  .grid {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 4px 14px;
-    font-size: 13px; margin: 8px 0;
-  }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 14px; font-size: 13px; margin: 8px 0; }
   .grid .k { color: var(--dim); }
   .grid .v { text-align: right; }
   .v.confirmed { color: var(--green); }
   .v.soundonly { color: var(--amber); }
-  .actions { display: flex; gap: 8px; margin-top: 6px; }
+
+  /* Nearby stations in card */
+  .nearby-stations {
+    margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--line);
+  }
+  .nearby-label { font-size: 11px; font-weight: 700; letter-spacing: 1px; color: var(--dim); margin-bottom: 5px; }
+  .station-row {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; padding: 4px 6px; border-radius: 5px;
+    background: var(--surface); margin-bottom: 3px;
+  }
+  .station-row .s-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--blue); flex-shrink: 0; }
+  .station-row .s-name { flex: 1; }
+  .station-row .s-dist { color: var(--teal); font-weight: 700; font-variant-numeric: tabular-nums; }
+  .station-row.nearest { background: #0d1f2d; border: 1px solid var(--blue); }
+  .no-nearby { font-size: 12px; color: var(--dim); font-style: italic; }
+
+  .actions { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
   .actions a, .actions button {
-    flex: 1; text-align: center; text-decoration: none;
+    flex: 1; text-align: center; text-decoration: none; min-width: 80px;
     font-size: 12px; padding: 6px; border-radius: 6px;
-    border: 1px solid var(--line); color: var(--text);
-    background: transparent; cursor: pointer;
+    border: 1px solid var(--line); color: var(--text); background: transparent; cursor: pointer;
   }
   .actions a:hover { border-color: var(--teal); }
   .actions .ack { border-color: var(--red); color: var(--red); }
   .actions .ack:hover { background: var(--red); color: #1a0000; }
   .acked-tag { color: var(--green); font-size: 11px; }
-  .leaflet-popup-content { font-family: Roboto, sans-serif; }
+  .leaflet-popup-content { font-family: Roboto, sans-serif; font-size: 13px; }
 </style>
 </head>
 <body>
 <header>
   <h1>SHOTSENSE • RESPONSE CONSOLE</h1>
   <span id="conn" class="pill down">CONNECTING…</span>
-  <span class="pill counts">Alerts: <b id="count">0</b> &nbsp;|&nbsp; Live: <b id="liveCount">0</b></span>
+  <span id="stationPill" class="pill station" style="display:none"></span>
+  <span class="pill counts">Alerts: <b id="count">0</b> | Real: <b id="liveCount">0</b></span>
   <div class="spacer"></div>
+  <button id="radiusBtn" class="ctl">📍 Radius: 2 km</button>
   <button id="filterBtn" class="ctl">Showing: ALL</button>
   <button id="soundBtn" class="ctl">🔔 Enable alarm</button>
 </header>
 <main>
   <div id="map"></div>
   <aside>
+    <div id="asideHeader" class="aside-header"></div>
     <div id="list"><div class="empty">No alerts yet. Waiting for the first signal…</div></div>
   </aside>
 </main>
 
-<!-- Leaflet loaded without SRI so a hash bump can't break the console; if the
-     CDN is unreachable (offline), the alert list still works without the map. -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 (function () {
   'use strict';
 
-  var alerts = [];          // newest last
-  var markers = {};         // id -> L.marker
-  var filter = 'ALL';       // ALL | GUNSHOT | TEST
+  // ── Police stations — Greater Accra ──────────────────────────────────────
+  var STATIONS = [
+    { name: "Accra Regional Police HQ",    lat: 5.5500, lng: -0.2100 },
+    { name: "National Police HQ",           lat: 5.5700, lng: -0.1900 },
+    { name: "Adabraka Police Station",      lat: 5.5609, lng: -0.2133 },
+    { name: "Tesano Police Station",        lat: 5.6100, lng: -0.2300 },
+    { name: "Mile 7 Police Station",        lat: 5.6311, lng: -0.2370 },
+    { name: "Accra Central Police Station", lat: 5.5436, lng: -0.2072 },
+    { name: "Ministries Police Station",    lat: 5.5482, lng: -0.1989 },
+    { name: "James Town Police Station",    lat: 5.5347, lng: -0.2114 },
+    { name: "Nima Police Station",          lat: 5.5756, lng: -0.2069 },
+    { name: "Kotobabi Police Station",      lat: 5.5910, lng: -0.2045 },
+    { name: "Airport Police Station",       lat: 5.5992, lng: -0.1764 },
+    { name: "East Legon Police Station",    lat: 5.6314, lng: -0.1610 },
+    { name: "Legon Police Station",         lat: 5.6517, lng: -0.1872 },
+    { name: "Madina Police Station",        lat: 5.6681, lng: -0.1664 },
+    { name: "Kwabenya Police Station",      lat: 5.6792, lng: -0.2144 },
+    { name: "Adenta Police Station",        lat: 5.7061, lng: -0.1601 },
+    { name: "Kaneshie Police Station",      lat: 5.5694, lng: -0.2378 },
+    { name: "Darkuman Police Station",      lat: 5.5841, lng: -0.2452 },
+    { name: "Odorkor Police Station",       lat: 5.5663, lng: -0.2612 },
+    { name: "Dansoman Police Station",      lat: 5.5501, lng: -0.2590 },
+    { name: "Korle-Bu Police Station",      lat: 5.5392, lng: -0.2306 },
+    { name: "Mamprobi Police Station",      lat: 5.5310, lng: -0.2394 },
+    { name: "Cantonments Police Station",   lat: 5.5661, lng: -0.1742 },
+    { name: "Osu Police Station",           lat: 5.5558, lng: -0.1831 },
+    { name: "Labadi Police Station",        lat: 5.5614, lng: -0.1558 },
+    { name: "Teshie Police Station",        lat: 5.5844, lng: -0.1017 },
+    { name: "Nungua Police Station",        lat: 5.6042, lng: -0.0761 },
+    { name: "Sakumono Police Station",      lat: 5.6231, lng: -0.0528 },
+    { name: "Batsoona Police Station",      lat: 5.6342, lng: -0.0883 },
+    { name: "Amasaman Police Station",      lat: 5.7022, lng: -0.3014 },
+    { name: "Pokuase Police Station",       lat: 5.6941, lng: -0.2721 },
+    { name: "Sowutuom Police Station",      lat: 5.6133, lng: -0.2758 },
+    { name: "Anyaa Police Station",         lat: 5.6144, lng: -0.2917 },
+    { name: "New Weija Police Station",     lat: 5.5542, lng: -0.3164 },
+    { name: "Kokrobite Police Station",     lat: 5.4897, lng: -0.3681 },
+    { name: "Tema Central Police Station",  lat: 5.6441, lng:  0.0031 },
+  ];
+
+  // Build slug → station index for ?station= URL param
+  function slugify(s) { return s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-$/, ''); }
+  STATIONS.forEach(function (s) { s.slug = slugify(s.name); });
+
+  // ── State ────────────────────────────────────────────────────────────────
+  var alerts = [];
+  var markers = {};          // alertId → L.circleMarker
+  var circles = {};          // alertId → L.circle (radius ring)
+  var stationMarkers = [];   // parallel to STATIONS
+  var filter = 'ALL';
+  var alertRadiusKm = 2;
   var soundEnabled = false;
   var audioCtx = null;
   var alarmTimer = null;
+
+  // Station-specific view from ?station= URL param
+  var urlStation = null;
+  try {
+    var sp = new URLSearchParams(window.location.search);
+    var slug = sp.get('station');
+    if (slug) {
+      urlStation = STATIONS.find(function (s) { return s.slug === slug; }) || null;
+    }
+  } catch (e) {}
 
   var listEl = document.getElementById('list');
   var countEl = document.getElementById('count');
   var liveCountEl = document.getElementById('liveCount');
   var connEl = document.getElementById('conn');
+  var asideHeader = document.getElementById('asideHeader');
 
-  // --- map (degrades gracefully if Leaflet/CDN unavailable) ---------------
+  // ── Map ──────────────────────────────────────────────────────────────────
   var map = null;
   if (window.L) {
-    map = L.map('map', { zoomControl: true }).setView([20, 0], 2);
+    map = L.map('map', { zoomControl: true }).setView([5.60, -0.19], 12);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
       attribution: '© OpenStreetMap',
     }).addTo(map);
+    placeStationMarkers();
   } else {
     document.getElementById('map').innerHTML =
       '<div class="empty">Map unavailable (offline). Alert list still works.</div>';
   }
 
-  // --- alarm (Web Audio; no asset needed) ---------------------------------
+  function placeStationMarkers() {
+    STATIONS.forEach(function (s, i) {
+      var isHome = urlStation && urlStation.slug === s.slug;
+      var m = L.circleMarker([s.lat, s.lng], {
+        radius: isHome ? 12 : 8,
+        color: isHome ? '#ffffff' : '#448aff',
+        fillColor: isHome ? '#448aff' : '#1a3a6e',
+        fillOpacity: isHome ? 0.95 : 0.75,
+        weight: isHome ? 3 : 1.5,
+      }).addTo(map);
+      m.bindTooltip(s.name, { permanent: false, direction: 'top', className: 'leaflet-tooltip' });
+      m.bindPopup(
+        '<b style="color:#448aff">🚔 ' + s.name + '</b><br>' +
+        '<small>' + s.lat.toFixed(4) + ', ' + s.lng.toFixed(4) + '</small><br>' +
+        '<a href="?station=' + s.slug + '" style="color:#448aff">Open station console →</a>'
+      );
+      stationMarkers[i] = m;
+    });
+  }
+
+  // ── Haversine ────────────────────────────────────────────────────────────
+  function distKm(lat1, lng1, lat2, lng2) {
+    var R = 6371;
+    var dLat = (lat2 - lat1) * Math.PI / 180;
+    var dLng = (lng2 - lng1) * Math.PI / 180;
+    var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  }
+
+  function nearbyStations(lat, lng) {
+    return STATIONS
+      .map(function (s) {
+        return { name: s.name, slug: s.slug, lat: s.lat, lng: s.lng, dist: distKm(lat, lng, s.lat, s.lng) };
+      })
+      .filter(function (s) { return s.dist <= alertRadiusKm; })
+      .sort(function (a, b) { return a.dist - b.dist; });
+  }
+
+  // ── Alarm ────────────────────────────────────────────────────────────────
   function beep(freq, when, dur) {
     var o = audioCtx.createOscillator();
     var g = audioCtx.createGain();
-    o.type = 'square';
-    o.frequency.value = freq;
-    o.connect(g);
-    g.connect(audioCtx.destination);
+    o.type = 'square'; o.frequency.value = freq;
+    o.connect(g); g.connect(audioCtx.destination);
     g.gain.setValueAtTime(0.0001, when);
     g.gain.exponentialRampToValueAtTime(0.25, when + 0.02);
     g.gain.exponentialRampToValueAtTime(0.0001, when + dur);
-    o.start(when);
-    o.stop(when + dur);
+    o.start(when); o.stop(when + dur);
   }
   function siren() {
     if (!soundEnabled || !audioCtx) return;
     var t = audioCtx.currentTime;
-    beep(880, t, 0.25);
-    beep(660, t + 0.3, 0.25);
+    beep(880, t, 0.25); beep(660, t + 0.3, 0.25);
   }
   function startAlarm() {
     if (!soundEnabled) return;
@@ -218,26 +285,51 @@
   }
   function stopAlarmIfAllAck() {
     var anyUnack = alerts.some(function (a) { return !a.test && !a.acknowledged; });
-    if (!anyUnack && alarmTimer) {
-      clearInterval(alarmTimer);
-      alarmTimer = null;
-    }
+    if (!anyUnack && alarmTimer) { clearInterval(alarmTimer); alarmTimer = null; }
   }
 
-  // --- formatting ---------------------------------------------------------
+  // ── Formatting ───────────────────────────────────────────────────────────
   function fmtCoord(v) { return v == null ? '—' : v.toFixed(6); }
   function fmtNum(v, d) { return v == null ? '—' : v.toFixed(d); }
-  function fmtTime(iso) {
-    try { return new Date(iso).toLocaleString(); } catch (e) { return iso; }
+  function fmtDist(km) { return km < 1 ? (km * 1000).toFixed(0) + ' m' : km.toFixed(2) + ' km'; }
+  function fmtTime(iso) { try { return new Date(iso).toLocaleString(); } catch (e) { return iso; } }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
   }
 
+  // ── Card HTML ────────────────────────────────────────────────────────────
   function avatarHtml(a) {
     var initial = (a.operatorName || a.deviceId || '?').charAt(0).toUpperCase();
     if (a.photoUrl) {
       return '<div class="avatar"><img src="' + escapeHtml(a.photoUrl) +
-        '" alt="" onerror="this.parentNode.innerHTML=\'' + escapeHtml(initial) + '\'"></div>';
+        '" alt="" onerror="this.parentNode.textContent=\'' + initial + '\'"></div>';
     }
-    return '<div class="avatar">' + escapeHtml(initial) + '</div>';
+    return '<div class="avatar">' + initial + '</div>';
+  }
+
+  function nearbyHtml(a) {
+    if (a.lat == null || a.lng == null) return '';
+    var nearby = nearbyStations(a.lat, a.lng);
+    if (!nearby.length) {
+      return '<div class="nearby-stations">' +
+        '<div class="nearby-label">NEAREST STATIONS (within ' + alertRadiusKm + ' km)</div>' +
+        '<div class="no-nearby">No stations within ' + alertRadiusKm + ' km</div>' +
+        '</div>';
+    }
+    var rows = nearby.map(function (s, i) {
+      return '<div class="station-row' + (i === 0 ? ' nearest' : '') + '">' +
+        '<div class="s-dot"></div>' +
+        '<div class="s-name">' + escapeHtml(s.name) + '</div>' +
+        '<div class="s-dist">' + fmtDist(s.dist) + '</div>' +
+        '</div>';
+    }).join('');
+    return '<div class="nearby-stations">' +
+      '<div class="nearby-label">NEAREST STATIONS (within ' + alertRadiusKm + ' km)</div>' +
+      rows +
+      '</div>';
   }
 
   function cardHtml(a) {
@@ -277,8 +369,9 @@
           '<span class="k">Location</span><span class="v">' + locStr + '</span>' +
           '<span class="k">Accuracy</span><span class="v">' +
             (a.accuracyMeters != null ? fmtNum(a.accuracyMeters, 0) + ' m' : '—') + '</span>' +
-          '<span class="k">Device time</span><span class="v">' + fmtTime(a.timestamp) + '</span>' +
+          '<span class="k">Received</span><span class="v">' + fmtTime(a.receivedAt) + '</span>' +
         '</div>' +
+        nearbyHtml(a) +
         '<div class="actions">' +
           (hasLoc ? '<a href="' + maps + '" target="_blank" rel="noopener">Open in Maps</a>' : '') +
           (hasLoc && map ? '<button onclick="window.__focus(\'' + a.id + '\')">Show on map</button>' : '') +
@@ -292,92 +385,137 @@
     );
   }
 
-  function escapeHtml(s) {
-    return String(s).replace(/[&<>"']/g, function (c) {
-      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
-    });
-  }
-
+  // ── Filter ───────────────────────────────────────────────────────────────
   function passesFilter(a) {
-    if (filter === 'ALL') return true;
-    if (filter === 'GUNSHOT') return !a.test;
-    if (filter === 'TEST') return a.test;
+    if (filter === 'GUNSHOT' && a.test) return false;
+    if (filter === 'TEST' && !a.test) return false;
+    // Station-specific view: only show alerts within radius of this station
+    if (urlStation) {
+      if (a.lat == null || a.lng == null) return false;
+      return distKm(a.lat, a.lng, urlStation.lat, urlStation.lng) <= alertRadiusKm;
+    }
     return true;
   }
 
   function render() {
-    var visible = alerts.filter(passesFilter).slice().reverse(); // newest first
+    var visible = alerts.filter(passesFilter).slice().reverse();
     if (!visible.length) {
-      listEl.innerHTML = '<div class="empty">No alerts to show for this filter.</div>';
+      listEl.innerHTML = '<div class="empty">No alerts' +
+        (urlStation ? ' within ' + alertRadiusKm + ' km of this station' : '') +
+        '.</div>';
     } else {
       listEl.innerHTML = visible.map(cardHtml).join('');
     }
     countEl.textContent = alerts.length;
     liveCountEl.textContent = alerts.filter(function (a) { return !a.test; }).length;
+
+    if (urlStation) {
+      asideHeader.textContent = urlStation.name + ' — alerts within ' + alertRadiusKm + ' km';
+    } else {
+      asideHeader.textContent = '';
+    }
+  }
+
+  // ── Map markers ──────────────────────────────────────────────────────────
+  function highlightNearbyStations(lat, lng) {
+    if (!map) return;
+    STATIONS.forEach(function (s, i) {
+      var m = stationMarkers[i];
+      if (!m) return;
+      var d = distKm(lat, lng, s.lat, s.lng);
+      var isHome = urlStation && urlStation.slug === s.slug;
+      if (d <= alertRadiusKm) {
+        m.setStyle({ color: '#ffffff', fillColor: '#ff5252', fillOpacity: 0.9, weight: 2.5, radius: isHome ? 13 : 10 });
+      } else {
+        m.setStyle({
+          color: isHome ? '#ffffff' : '#448aff',
+          fillColor: isHome ? '#448aff' : '#1a3a6e',
+          fillOpacity: isHome ? 0.95 : 0.75,
+          weight: isHome ? 3 : 1.5,
+          radius: isHome ? 12 : 8,
+        });
+      }
+    });
   }
 
   function placeMarker(a) {
     if (!map || a.lat == null || a.lng == null) return;
     var color = a.test ? '#ffb300' : '#ff5252';
     var m = L.circleMarker([a.lat, a.lng], {
-      radius: a.test ? 7 : 10,
-      color: color,
-      fillColor: color,
-      fillOpacity: 0.7,
-      weight: 2,
+      radius: a.test ? 7 : 10, color: color, fillColor: color, fillOpacity: 0.8, weight: 2,
     }).addTo(map);
+    var nearby = nearbyStations(a.lat, a.lng);
+    var nearbyText = nearby.length
+      ? nearby.map(function (s) { return s.name + ' (' + fmtDist(s.dist) + ')'; }).join('<br>')
+      : 'None within ' + alertRadiusKm + ' km';
     m.bindPopup(
-      '<b>' + (a.test ? 'TEST' : 'GUNSHOT') + '</b><br>' +
-      escapeHtml(a.deviceId) + '<br>' +
-      'Shots: ' + a.shots + '<br>' +
-      (a.confirmed ? 'Confirmed (sound+recoil)' : 'Sound only') + '<br>' +
-      fmtTime(a.receivedAt)
+      '<b style="color:' + color + '">' + (a.test ? '⚠ TEST' : '🔴 GUNSHOT') + '</b><br>' +
+      escapeHtml(a.operatorName || a.deviceId) + '<br>' +
+      'Shots: ' + a.shots + ' &nbsp;|&nbsp; ' + (a.confirmed ? 'Confirmed' : 'Sound only') + '<br>' +
+      fmtTime(a.receivedAt) + '<br>' +
+      '<hr style="margin:4px 0;border-color:#333"><b>Nearby stations:</b><br>' + nearbyText
     );
     markers[a.id] = m;
+
+    // Radius ring (only for real alerts)
+    if (!a.test) {
+      var ring = L.circle([a.lat, a.lng], {
+        radius: alertRadiusKm * 1000, color: '#ff5252',
+        fillColor: '#ff5252', fillOpacity: 0.04, weight: 1, dashArray: '5,6',
+      }).addTo(map);
+      circles[a.id] = ring;
+    }
   }
 
   window.__focus = function (id) {
     var m = markers[id];
-    if (m && map) {
-      map.setView(m.getLatLng(), 16);
-      m.openPopup();
-    }
+    if (m && map) { map.setView(m.getLatLng(), 14); m.openPopup(); }
   };
 
   window.__ack = function (id) {
     fetch('/api/ack?id=' + encodeURIComponent(id), { method: 'POST' });
-    // optimistic; the SSE 'ack' event will also arrive
     var a = alerts.find(function (x) { return x.id === id; });
     if (a) a.acknowledged = true;
     render();
     stopAlarmIfAllAck();
   };
 
+  // ── Add alert ────────────────────────────────────────────────────────────
   function addAlert(a, isNew) {
     alerts.push(a);
     if (alerts.length > 500) alerts.shift();
     placeMarker(a);
     render();
     if (isNew && a.lat != null && a.lng != null && map) {
-      map.setView([a.lat, a.lng], 15);
+      map.setView([a.lat, a.lng], 14);
+      highlightNearbyStations(a.lat, a.lng);
     }
-    if (isNew && !a.test) {
-      startAlarm();
-      notify(a);
-    }
+    if (isNew && !a.test) { startAlarm(); notify(a); }
   }
 
-  // --- desktop notifications ----------------------------------------------
+  // ── Desktop notifications ────────────────────────────────────────────────
   function notify(a) {
     if (!('Notification' in window) || Notification.permission !== 'granted') return;
+    var nearby = (a.lat != null && a.lng != null) ? nearbyStations(a.lat, a.lng) : [];
     var body =
-      a.deviceId + ' — ' + a.shots + ' shot(s)\n' +
+      (a.operatorName || a.deviceId) + ' — ' + a.shots + ' shot(s)\n' +
       (a.confirmed ? 'Confirmed (sound+recoil)' : 'Sound only') +
-      (a.lat != null ? '\n' + fmtCoord(a.lat) + ', ' + fmtCoord(a.lng) : '');
+      (nearby.length ? '\nNearest: ' + nearby[0].name + ' (' + fmtDist(nearby[0].dist) + ')' : '');
     try { new Notification('🔴 GUNSHOT ALERT', { body: body }); } catch (e) {}
   }
 
-  // --- controls -----------------------------------------------------------
+  // ── Controls ─────────────────────────────────────────────────────────────
+  var radiusOptions = [1, 2, 3, 5, 10];
+  var radiusIdx = 1; // default 2 km
+  document.getElementById('radiusBtn').onclick = function () {
+    radiusIdx = (radiusIdx + 1) % radiusOptions.length;
+    alertRadiusKm = radiusOptions[radiusIdx];
+    this.textContent = '📍 Radius: ' + alertRadiusKm + ' km';
+    render();
+    // Re-draw circles won't update existing ones (too complex for prototype),
+    // but new alerts will use the new radius.
+  };
+
   document.getElementById('filterBtn').onclick = function () {
     filter = filter === 'ALL' ? 'GUNSHOT' : filter === 'GUNSHOT' ? 'TEST' : 'ALL';
     this.textContent = 'Showing: ' + filter;
@@ -391,7 +529,7 @@
     if (soundEnabled) {
       audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
       if (audioCtx.state === 'suspended') audioCtx.resume();
-      beep(880, audioCtx.currentTime, 0.15); // confirmation chirp
+      beep(880, audioCtx.currentTime, 0.15);
       if ('Notification' in window && Notification.permission === 'default') {
         Notification.requestPermission();
       }
@@ -401,33 +539,35 @@
     }
   };
 
-  // --- live stream --------------------------------------------------------
+  // ── Station-specific UI tweaks ───────────────────────────────────────────
+  if (urlStation) {
+    var pill = document.getElementById('stationPill');
+    pill.textContent = '🚔 ' + urlStation.name;
+    pill.style.display = '';
+    document.title = urlStation.name + ' — ShotSense';
+  }
+
+  // ── Live stream ──────────────────────────────────────────────────────────
   function connect() {
     var es = new EventSource('/events');
     es.addEventListener('hello', function () {
-      connEl.textContent = 'LIVE';
-      connEl.className = 'pill live';
+      connEl.textContent = 'LIVE'; connEl.className = 'pill live';
     });
-    es.addEventListener('alert', function (e) {
-      addAlert(JSON.parse(e.data), true);
-    });
+    es.addEventListener('alert', function (e) { addAlert(JSON.parse(e.data), true); });
     es.addEventListener('ack', function (e) {
       var id = JSON.parse(e.data).id;
       var a = alerts.find(function (x) { return x.id === id; });
       if (a) { a.acknowledged = true; render(); stopAlarmIfAllAck(); }
     });
     es.onerror = function () {
-      connEl.textContent = 'RECONNECTING…';
-      connEl.className = 'pill down';
+      connEl.textContent = 'RECONNECTING…'; connEl.className = 'pill down';
     };
   }
 
-  // --- boot ---------------------------------------------------------------
+  // ── Boot ─────────────────────────────────────────────────────────────────
   fetch('/api/alerts')
     .then(function (r) { return r.json(); })
-    .then(function (existing) {
-      existing.forEach(function (a) { addAlert(a, false); });
-    })
+    .then(function (existing) { existing.forEach(function (a) { addAlert(a, false); }); })
     .catch(function () {})
     .finally(connect);
 })();
