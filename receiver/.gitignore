@@ -1,0 +1,4 @@
+# runtime data — never commit captured alerts
+alerts.ndjson
+*.log
+node_modules/

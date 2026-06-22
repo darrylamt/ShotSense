@@ -1,0 +1,14 @@
+{
+  "name": "shotsense-receiver",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ShotSense response console — receives gunshot alerts over HTTP and displays them on a live map for first responders / security operators.",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
