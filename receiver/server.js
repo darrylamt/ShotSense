@@ -158,6 +158,16 @@ const server = http.createServer(async (req, res) => {
     return sendJson(res, 200, { ok: true, alerts: alerts.length, time: new Date().toISOString() });
   }
 
+  // Friendly hint if someone opens /alert in a browser (browsers send GET)
+  if (req.method === 'GET' && pathname === '/alert') {
+    res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
+    return res.end(
+      'This is the POST-only alert endpoint for the ShotSense phone app.\n' +
+        'Open the console at  /  (e.g. http://' + (req.headers.host || 'localhost') + '/ )\n' +
+        'The phone POSTs JSON here; a browser GET shows this message.'
+    );
+  }
+
   // Receive an alert from the phone
   if (req.method === 'POST' && pathname === '/alert') {
     if (!tokenOk(req, url)) return sendJson(res, 401, { ok: false, error: 'bad token' });
